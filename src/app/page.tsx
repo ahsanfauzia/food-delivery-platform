@@ -1,101 +1,152 @@
-import Image from "next/image";
+import { prisma } from "@/lib/prisma";
+import RestaurantCard from "@/components/customer/RestaurantCard";
+import Link from "next/link";
+import { ArrowRight, Sparkles, Flame, Tag } from "lucide-react";
+import { mockCategories, mockRestaurants, mockCoupons } from "@/lib/mockData";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  let categories = mockCategories;
+  let restaurants = mockRestaurants;
+  let coupons = mockCoupons;
+
+  try {
+    const [dbCategories, dbRestaurants, dbCoupons] = await Promise.all([
+      prisma.category.findMany({ take: 8 }),
+      prisma.restaurant.findMany({ where: { active: true }, take: 8 }),
+      prisma.coupon.findMany({ where: { active: true }, take: 2 }),
+    ]);
+
+    if (dbCategories.length > 0) categories = dbCategories;
+    if (dbRestaurants.length > 0) restaurants = dbRestaurants;
+    if (dbCoupons.length > 0) coupons = dbCoupons;
+  } catch (error) {
+    console.warn("Database paused/offline. Serving resilient rich fallback data.");
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="space-y-16 pb-24">
+      {/* Hero Banner Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 text-white py-24 sm:py-32 px-4 rounded-b-[40px] shadow-2xl">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.1),transparent_50%)]"></div>
+        <div className="max-w-5xl mx-auto text-center space-y-8 relative z-10">
+          <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase">
+            <Sparkles className="h-4 w-4 animate-spin" />
+            <span>Premium Food Delivery</span>
+          </div>
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
+            Craving for Deliciousness? <br />
+            We Deliver it <span className="underline decoration-wavy decoration-yellow-300">Hot & Fresh</span>.
+          </h1>
+          <p className="text-lg sm:text-xl text-orange-50 max-w-2xl mx-auto font-medium">
+            Explore the best restaurants, local delicacies, and trending cuisines available for delivery.
+          </p>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          {/* Search Button Link */}
+          <div className="flex justify-center pt-4">
+            <Link
+              href="/restaurants"
+              className="inline-flex items-center px-8 py-4 border border-transparent text-base font-extrabold rounded-full text-orange-600 bg-white hover:bg-orange-50 hover:scale-105 transition-all shadow-xl hover:shadow-orange-700/30"
+            >
+              Order Now
+              <ArrowRight className="h-5 w-5 ml-2" />
+            </Link>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+        {/* Categories Section */}
+        {categories.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex justify-between items-end">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center">
+                  <Flame className="h-6 w-6 text-orange-500 mr-2" /> What&apos;s on your mind?
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">Explore our curated categories of cuisines</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
+              {categories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={`/restaurants?category=${encodeURIComponent(category.name)}`}
+                  className="group text-center space-y-3 block"
+                >
+                  <div className="relative mx-auto h-24 w-24 sm:h-28 sm:w-28 rounded-full overflow-hidden border-2 border-transparent group-hover:border-orange-500 group-hover:shadow-md transition-all duration-300 bg-white shadow-sm">
+                    <img
+                      src={category.image}
+                      alt={category.name}
+                      className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-800 group-hover:text-orange-500 transition-colors">
+                    {category.name}
+                  </h3>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Promo Deals Banners */}
+        {coupons.length > 0 && (
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {coupons.map((coupon) => (
+              <div
+                key={coupon.id}
+                className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-3xl p-6 shadow-md relative overflow-hidden flex items-center justify-between group hover:shadow-xl transition-shadow"
+              >
+                <div className="space-y-2 relative z-10">
+                  <span className="bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest">
+                    Offer Code: {coupon.code}
+                  </span>
+                  <h3 className="text-2xl font-black">
+                    {coupon.discountType === "PERCENTAGE"
+                      ? `${coupon.discountValue}% OFF`
+                      : `₹${coupon.discountValue} FLAT OFF`}
+                  </h3>
+                  <p className="text-xs text-orange-50">
+                    Min order: ₹{coupon.minOrderAmount}
+                    {coupon.maxDiscount ? ` | Max discount: ₹${coupon.maxDiscount}` : ""}
+                  </p>
+                </div>
+                <div className="relative z-10 shrink-0 bg-white/20 backdrop-blur-md p-4 rounded-2xl border border-white/10 group-hover:scale-110 transition-transform">
+                  <Tag className="h-8 w-8 text-white" />
+                </div>
+                <div className="absolute right-0 bottom-0 translate-y-1/4 translate-x-1/4 h-32 w-32 rounded-full bg-white/10 blur-2xl"></div>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {/* Restaurants Grid Section */}
+        <section className="space-y-8">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+              Top Rated Restaurants
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Handpicked options for high-quality food delivery
+            </p>
+          </div>
+
+          {restaurants.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {restaurants.map((restaurant) => (
+                <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white border border-gray-100 p-12 text-center rounded-3xl">
+              <p className="text-gray-500 font-semibold">No restaurants available right now.</p>
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
